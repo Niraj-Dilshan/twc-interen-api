@@ -1,9 +1,9 @@
 import { Controller, Get, UseGuards } from '@nestjs/common';
-import { AuthGuard } from '@nestjs/passport';
+import { JwtGuard } from 'src/auth/guard';
 
 @Controller('contacts')
 export class ContactController {
-  @UseGuards(AuthGuard('jwt'))
+  @UseGuards(JwtGuard)
   @Get()
   getContacts() {
     return 'All contacts';
