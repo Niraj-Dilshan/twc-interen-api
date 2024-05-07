@@ -19,33 +19,33 @@ import { CreateContactDto, UpdateContactDto } from './dto';
 export class ContactController {
   constructor(private contactService: ContactService) {}
   @Get()
-  getContacts(@GetUser('id') userID: number) {
-    return this.contactService.getContacts(userID);
+  getContacts(@GetUser('id') userId: number) {
+    return this.contactService.getContacts(userId);
   }
   @Get(':id')
   getContactById(
-    @GetUser('id') userID: number,
+    @GetUser('id') userId: number,
     @Param('id', ParseIntPipe) contactId: number,
   ) {
-    return this.contactService.getContactById(userID, contactId);
+    return this.contactService.getContactById(userId, contactId);
   }
   @Post()
-  createContact(@GetUser('id') userID: number, @Body() dto: CreateContactDto) {
-    return this.contactService.createContact(userID, dto);
+  createContact(@GetUser('id') userId: number, @Body() dto: CreateContactDto) {
+    return this.contactService.createContact(userId, dto);
   }
   @Patch(':id')
   editContactById(
-    @GetUser('id') userID: number,
+    @GetUser('id') userId: number,
     @Param('id', ParseIntPipe) contactId: number,
     @Body() dto: UpdateContactDto,
   ) {
-    return this.contactService.editContactById(userID, contactId, dto);
+    return this.contactService.editContactById(userId, contactId, dto);
   }
   @Delete(':id')
   deleteContactById(
-    @GetUser('id') userID: number,
+    @GetUser('id') userId: number,
     @Param('id', ParseIntPipe) contactId: number,
   ) {
-    return this.contactService.deleteContactById(userID, contactId);
+    return this.contactService.deleteContactById(userId, contactId);
   }
 }
