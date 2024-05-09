@@ -15,7 +15,7 @@ export class AuthService {
     private config: ConfigService,
   ) {}
 
-  async signin(dto: AuthUserDto, res: Response) { // Add res parameter
+  async signin(dto: AuthUserDto, res: Response) {
     const user = await this.prisma.user.findUnique({
       where: {
         email: dto.email,
@@ -32,11 +32,11 @@ export class AuthService {
       throw new ForbiddenException('Invalid credentials');
     }
 
-    const token = await this.signToken(user.id, user.email, res); // Corrected to send token as response
-    return res.json({ access_token: token }); // Send token in response
+    const token = await this.signToken(user.id, user.email, res);
+    return res.json(token); // Directly return the token
   }
 
-  async signup(dto: AuthUserDto, res: Response) { // Add res parameter
+  async signup(dto: AuthUserDto, res: Response) {
     const hashedPassword = await argon.hash(dto.password);
 
     try {
@@ -47,8 +47,8 @@ export class AuthService {
         },
       });
 
-      const token = await this.signToken(user.id, user.email, res); // Corrected to send token as response
-      return res.json({ access_token: token }); // Send token in response
+      const token = await this.signToken(user.id, user.email, res);
+      return res.json(token); // Directly return the token
     } catch (error) {
       if (error instanceof PrismaClientKnownRequestError) {
         if (error.code === 'P2002') {
