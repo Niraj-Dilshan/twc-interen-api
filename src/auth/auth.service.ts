@@ -5,6 +5,7 @@ import * as argon from 'argon2';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
+import { Response } from 'express'; // Import Response
 
 @Injectable()
 export class AuthService {
@@ -13,7 +14,8 @@ export class AuthService {
     private jwt: JwtService,
     private config: ConfigService,
   ) {}
-  async signin(dto: AuthUserDto) {
+
+  async signin(dto: AuthUserDto, res: Response) { // Add res parameter
     const user = await this.prisma.user.findUnique({
       where: {
         email: dto.email,
@@ -30,10 +32,11 @@ export class AuthService {
       throw new ForbiddenException('Invalid credentials');
     }
 
-    return this.signToken(user.id, user.email);
+    const token = await this.signToken(user.id, user.email, res); // Corrected to send token as response
+    return res.json({ access_token: token }); // Send token in response
   }
 
-  async signup(dto: AuthUserDto) {
+  async signup(dto: AuthUserDto, res: Response) { // Add res parameter
     const hashedPassword = await argon.hash(dto.password);
 
     try {
@@ -44,7 +47,8 @@ export class AuthService {
         },
       });
 
-      return this.signToken(user.id, user.email);
+      const token = await this.signToken(user.id, user.email, res); // Corrected to send token as response
+      return res.json({ access_token: token }); // Send token in response
     } catch (error) {
       if (error instanceof PrismaClientKnownRequestError) {
         if (error.code === 'P2002') {
@@ -59,6 +63,7 @@ export class AuthService {
   async signToken(
     userId: number,
     email: string,
+    res: Response, // Add res parameter
   ): Promise<{ access_token: string }> {
     const payload = {
       sub: userId,
@@ -70,6 +75,14 @@ export class AuthService {
       expiresIn: '1h',
       secret: secret,
     });
+
+    // Set the JWT as a cookie
+    res.cookie('access_token', token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production', // Use secure cookies in production
+      maxAge: 3600000, // 1 hour
+    });
+
     return {
       access_token: token,
     };
